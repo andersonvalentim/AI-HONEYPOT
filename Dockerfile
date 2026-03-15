@@ -1,23 +1,19 @@
-FROM cr.fluentbit.io/fluent/fluent-bit:3.2 AS fluentbit
-
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# --- OpenCanary + supervisor ---
+# --- OpenCanary + Supervisor + Fluent Bit ---
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        libssl-dev libffi-dev libpcap-dev \
        build-essential supervisor \
+       curl ca-certificates gnupg \
     && pip install --no-cache-dir opencanary \
-    && apt-get purge -y build-essential \
+    && curl https://raw.githubusercontent.com/fluent/fluent-bit/master/install.sh | sh \
+    && apt-get purge -y build-essential gnupg \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
-
-# --- Fluent Bit binary from official image ---
-COPY --from=fluentbit /fluent-bit/bin/fluent-bit /usr/local/bin/fluent-bit
-COPY --from=fluentbit /fluent-bit/lib/ /fluent-bit/lib/
 
 # --- Directories ---
 RUN mkdir -p /etc/opencanaryd /var/log/opencanary /fluent-bit/etc /app
