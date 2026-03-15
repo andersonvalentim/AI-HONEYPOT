@@ -45,6 +45,24 @@ def get_metrics() -> dict | None:
         return None
 
 
+def safe_int(val) -> int:
+    return int(val) if isinstance(val, (int, float)) else 0
+
+
+def extract_plugin_stats(plugin_data) -> dict:
+    """Handle both dict and list formats from different Fluent Bit versions."""
+    if isinstance(plugin_data, dict):
+        return plugin_data
+    if isinstance(plugin_data, list):
+        merged = {}
+        for item in plugin_data:
+            if isinstance(item, dict):
+                for k, v in item.items():
+                    merged[k] = merged.get(k, 0) + safe_int(v) if isinstance(v, (int, float)) else v
+        return merged
+    return {}
+
+
 def extract_output_stats(metrics: dict) -> dict:
     total_out = 0
     total_errors = 0
@@ -53,17 +71,17 @@ def extract_output_stats(metrics: dict) -> dict:
 
     output = metrics.get("output", {})
     for plugin_name, plugin_data in output.items():
-        for record in plugin_data:
-            total_out += record.get("records", 0)
-            total_errors += record.get("errors", 0)
-            total_retries += record.get("retries", 0)
-            total_retries_failed += record.get("retries_failed", 0)
+        stats = extract_plugin_stats(plugin_data)
+        total_out += safe_int(stats.get("proc_records", stats.get("records", 0)))
+        total_errors += safe_int(stats.get("errors", 0))
+        total_retries += safe_int(stats.get("retries", 0))
+        total_retries_failed += safe_int(stats.get("retries_failed", 0))
 
     total_in = 0
     input_data = metrics.get("input", {})
     for plugin_name, plugin_data in input_data.items():
-        for record in plugin_data:
-            total_in += record.get("records", 0)
+        stats = extract_plugin_stats(plugin_data)
+        total_in += safe_int(stats.get("records", 0))
 
     return {
         "records_in": total_in,
