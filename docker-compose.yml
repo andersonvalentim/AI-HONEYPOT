@@ -1,0 +1,42 @@
+services:
+  opencanary:
+    build:
+      context: ./opencanary
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      OPENCANARY_DEVICE_NODE_ID: "${OPENCANARY_DEVICE_NODE_ID:-agents-ia-honeypot}"
+      OPENCANARY_HTTP_BANNER: "${OPENCANARY_HTTP_BANNER:-Apache/2.4.7 (Ubuntu)}"
+      OPENCANARY_SSH_BANNER: "${OPENCANARY_SSH_BANNER:-SSH-2.0-OpenSSH_7.2p2 Ubuntu-4ubuntu2.10}"
+    volumes:
+      - ./opencanary/opencanary.conf:/etc/opencanaryd/opencanary.conf:ro
+      - ./logs/opencanary:/var/log/opencanary
+
+  fluent-bit:
+    image: cr.fluentbit.io/fluent/fluent-bit:3.2
+    restart: unless-stopped
+    depends_on:
+      - opencanary
+      - ai-decoy
+    environment:
+      LOGZIO_TOKEN: "${LOGZIO_TOKEN}"
+      LOGZIO_LISTENER_HOST: "${LOGZIO_LISTENER_HOST:-listener.logz.io}"
+      LOGZIO_LISTENER_PORT: "${LOGZIO_LISTENER_PORT:-8071}"
+      HONEYPOT_ENV: "${HONEYPOT_ENV:-lab}"
+    volumes:
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ./logs/opencanary:/var/log/opencanary:ro
+
+  ai-decoy:
+    build:
+      context: ./ai-decoy
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      AI_DECOY_NODE_ID: "${AI_DECOY_NODE_ID:-agents-ia-honeypot-ai-decoy}"
+      AI_DECOY_LOG_PATH: "/var/log/opencanary/ai-decoy.log"
+    volumes:
+      - ./logs/opencanary:/var/log/opencanary
