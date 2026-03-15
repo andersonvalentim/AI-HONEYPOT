@@ -26,6 +26,9 @@ RUN chmod +x /entrypoint-opencanary.sh
 # --- AI Decoy ---
 COPY ai-decoy/server.py /app/server.py
 
+# --- Health Check ---
+COPY healthcheck.py /app/healthcheck.py
+
 # --- Fluent Bit config ---
 COPY fluent-bit/fluent-bit.conf /fluent-bit/etc/fluent-bit.conf
 COPY fluent-bit/parsers.conf    /fluent-bit/etc/parsers.conf
