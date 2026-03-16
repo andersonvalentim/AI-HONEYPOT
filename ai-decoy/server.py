@@ -49,6 +49,15 @@ def parse_http_request(raw: bytes) -> Tuple[str, str, Dict[str, str], str]:
         return "GET", "/", {}, ""
 
 
+def resolve_client_ip(tcp_ip: str, headers: Dict[str, str]) -> str:
+    """Extract real client IP from proxy headers, fallback to TCP peer."""
+    for header in ("x-forwarded-for", "x-real-ip", "cf-connecting-ip", "true-client-ip"):
+        val = headers.get(header, "")
+        if val:
+            return val.split(",")[0].strip()
+    return tcp_ip
+
+
 def build_response(port: int, path: str) -> bytes:
     service = SERVICE_MAP.get(port, {"service": "unknown", "banner": "AI Service"})
     payload = {
@@ -93,6 +102,7 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
         pass
 
     method, path, headers, body = parse_http_request(data)
+    real_ip = resolve_client_ip(src_ip, headers)
 
     event = {
         "local_time_adjusted": utc_iso(),
@@ -101,8 +111,9 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
         "event_source": "ai-decoy",
         "service_name": service,
         "dst_port": dst_port,
-        "src_host": src_ip,
+        "src_host": real_ip,
         "src_port": src_port,
+        "proxy_ip": src_ip if real_ip != src_ip else "",
         "http_method": method,
         "http_path": path,
         "user_agent": headers.get("user-agent", ""),
