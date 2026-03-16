@@ -15,11 +15,6 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-# --- Logz.io Fluent Bit output plugin ---
-RUN mkdir -p /fluent-bit/plugins \
-    && curl -sSL -o /fluent-bit/plugins/out_logzio.so \
-       https://github.com/logzio/fluent-bit-logzio-output/raw/master/build/out_logzio-linux.so
-
 # --- Directories ---
 RUN mkdir -p /etc/opencanaryd /var/log/opencanary /fluent-bit/etc /app
 
@@ -37,7 +32,6 @@ COPY healthcheck.py /app/healthcheck.py
 # --- Fluent Bit config ---
 COPY fluent-bit/fluent-bit.conf /fluent-bit/etc/fluent-bit.conf
 COPY fluent-bit/parsers.conf    /fluent-bit/etc/parsers.conf
-COPY fluent-bit/plugins.conf    /fluent-bit/etc/plugins.conf
 
 # --- Supervisord ---
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
