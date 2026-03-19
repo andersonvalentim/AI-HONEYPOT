@@ -36,6 +36,21 @@ flowchart LR
 | Audit output | Structured JSON logs + forwarding to `logz.io` |
 | Teaching fit | Great for reconnaissance mapping and attacker behavior analysis |
 
+## Deploy on VPS / Dedicated Server (one-liner)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/andersonvalentim/AI-HONEYPOT/main/setup.sh | sudo bash
+```
+
+The script will:
+- Install Docker if needed
+- Clone the repository to `/opt/ai-honeypot`
+- Ask for port mode (standard vs high ports)
+- Configure logz.io token interactively
+- Handle SSH port conflict on port 22
+- Offer to open firewall ports (ufw)
+- Build and start all containers
+
 ## Quick Start (Local with Docker Compose)
 
 ```bash
