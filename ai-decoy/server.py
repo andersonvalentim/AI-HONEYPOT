@@ -7,16 +7,36 @@ from typing import Dict, Tuple
 LOG_PATH = os.getenv("AI_DECOY_LOG_PATH", "/var/log/opencanary/ai-decoy.log")
 NODE_ID = os.getenv("AI_DECOY_NODE_ID", "agents-ia-honeypot-ai-decoy")
 
-SERVICE_MAP: Dict[int, Dict[str, str]] = {
-    5678: {"service": "n8n", "banner": "n8n Automation Platform"},
-    3000: {"service": "openclaw", "banner": "OpenClaw AI Workspace"},
-    3001: {"service": "open-webui", "banner": "Open WebUI"},
-    11434: {"service": "ollama", "banner": "Ollama API"},
-    7860: {"service": "gradio", "banner": "Gradio Interface"},
-    8888: {"service": "jupyter", "banner": "Jupyter Server"},
-    8080: {"service": "flowise", "banner": "Flowise AI"},
-    9000: {"service": "anythingllm", "banner": "AnythingLLM"},
+DEFAULT_SERVICE_MAP: Dict[int, Dict[str, str]] = {
+    15678: {"service": "n8n", "banner": "n8n Automation Platform"},
+    13000: {"service": "openclaw", "banner": "OpenClaw AI Workspace"},
+    13001: {"service": "open-webui", "banner": "Open WebUI"},
+    21434: {"service": "ollama", "banner": "Ollama API"},
+    17860: {"service": "gradio", "banner": "Gradio Interface"},
+    18888: {"service": "jupyter", "banner": "Jupyter Server"},
+    18081: {"service": "flowise", "banner": "Flowise AI"},
+    19000: {"service": "anythingllm", "banner": "AnythingLLM"},
 }
+
+
+def load_service_map() -> Dict[int, Dict[str, str]]:
+    """Load port map from AI_DECOY_PORTS env var or use defaults.
+
+    Format: port:service:banner,port:service:banner,...
+    Example: 5678:n8n:n8n Platform,3000:openclaw:OpenClaw
+    """
+    raw = os.getenv("AI_DECOY_PORTS", "")
+    if not raw:
+        return DEFAULT_SERVICE_MAP
+    result: Dict[int, Dict[str, str]] = {}
+    for entry in raw.split(","):
+        parts = entry.strip().split(":", 2)
+        if len(parts) == 3:
+            result[int(parts[0])] = {"service": parts[1], "banner": parts[2]}
+    return result if result else DEFAULT_SERVICE_MAP
+
+
+SERVICE_MAP = load_service_map()
 
 
 def utc_iso() -> str:

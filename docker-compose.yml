@@ -4,13 +4,43 @@ services:
       context: ./opencanary
       dockerfile: Dockerfile
     restart: unless-stopped
-    network_mode: host
     environment:
       OPENCANARY_DEVICE_NODE_ID: "${OPENCANARY_DEVICE_NODE_ID:-agents-ia-honeypot}"
       OPENCANARY_HTTP_BANNER: "${OPENCANARY_HTTP_BANNER:-Apache/2.4.7 (Ubuntu)}"
       OPENCANARY_SSH_BANNER: "${OPENCANARY_SSH_BANNER:-SSH-2.0-OpenSSH_7.2p2 Ubuntu-4ubuntu2.10}"
+    ports:
+      - "18080:18080"
+      - "10021:10021"
+      - "10022:10022"
+      - "10023:10023"
+      - "10025:10025"
+      - "10110:10110"
+      - "10143:10143"
+      - "13306:13306"
+      - "13389:13389"
+      - "15432:15432"
     volumes:
       - ./opencanary/opencanary.conf:/etc/opencanaryd/opencanary.conf:ro
+      - ./logs/opencanary:/var/log/opencanary
+
+  ai-decoy:
+    build:
+      context: ./ai-decoy
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      AI_DECOY_NODE_ID: "${AI_DECOY_NODE_ID:-agents-ia-honeypot-ai-decoy}"
+      AI_DECOY_LOG_PATH: "/var/log/opencanary/ai-decoy.log"
+    ports:
+      - "15678:15678"
+      - "13000:13000"
+      - "13001:13001"
+      - "21434:21434"
+      - "17860:17860"
+      - "18888:18888"
+      - "18081:18081"
+      - "19000:19000"
+    volumes:
       - ./logs/opencanary:/var/log/opencanary
 
   fluent-bit:
@@ -28,15 +58,3 @@ services:
       - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
       - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
       - ./logs/opencanary:/var/log/opencanary:ro
-
-  ai-decoy:
-    build:
-      context: ./ai-decoy
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      AI_DECOY_NODE_ID: "${AI_DECOY_NODE_ID:-agents-ia-honeypot-ai-decoy}"
-      AI_DECOY_LOG_PATH: "/var/log/opencanary/ai-decoy.log"
-    volumes:
-      - ./logs/opencanary:/var/log/opencanary

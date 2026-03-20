@@ -217,6 +217,7 @@ services:
     environment:
       AI_DECOY_NODE_ID: "${AI_DECOY_NODE_ID:-agents-ia-honeypot-ai-decoy}"
       AI_DECOY_LOG_PATH: "/var/log/opencanary/ai-decoy.log"
+      AI_DECOY_PORTS: "5678:n8n:n8n Automation Platform,3000:openclaw:OpenClaw AI Workspace,3001:open-webui:Open WebUI,11434:ollama:Ollama API,7860:gradio:Gradio Interface,8888:jupyter:Jupyter Server,8080:flowise:Flowise AI,9000:anythingllm:AnythingLLM"
     volumes:
       - ./logs/opencanary:/var/log/opencanary
 
