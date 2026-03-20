@@ -16,6 +16,7 @@ RUN apt-get update \
 
 RUN mkdir -p /etc/opencanaryd /var/log/opencanary
 
+COPY opencanary.conf /etc/opencanaryd/opencanary.conf
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

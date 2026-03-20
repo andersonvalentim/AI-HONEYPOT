@@ -149,13 +149,9 @@ apply_vps_ports() {
           "stream": "ext://sys.stdout"
         },
         "file": {
-          "class": "logging.handlers.WatchedFileHandler",
+          "class": "logging.FileHandler",
           "filename": "/var/log/opencanary/opencanary.log"
         }
-      },
-      "root": {
-        "level": "INFO",
-        "handlers": ["console", "file"]
       }
     }
   },
@@ -256,13 +252,9 @@ apply_cloud_ports() {
           "stream": "ext://sys.stdout"
         },
         "file": {
-          "class": "logging.handlers.WatchedFileHandler",
+          "class": "logging.FileHandler",
           "filename": "/var/log/opencanary/opencanary.log"
         }
-      },
-      "root": {
-        "level": "INFO",
-        "handlers": ["console", "file"]
       }
     }
   },

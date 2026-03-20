@@ -1,16 +1,14 @@
 #!/usr/bin/env sh
 set -eu
 
-mkdir -p /var/log/opencanary /tmp/opencanaryd
-
-cp /etc/opencanaryd/opencanary.conf /tmp/opencanaryd/opencanary.conf
+mkdir -p /var/log/opencanary
 
 python - <<'PY'
 import json
 import os
 from pathlib import Path
 
-cfg_path = Path("/tmp/opencanaryd/opencanary.conf")
+cfg_path = Path("/etc/opencanaryd/opencanary.conf")
 cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
 
 cfg["device.node_id"] = os.getenv("OPENCANARY_DEVICE_NODE_ID", cfg.get("device.node_id", "agents-ia-honeypot"))
@@ -26,5 +24,4 @@ if ssh_banner:
 cfg_path.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
 PY
 
-export OPENCANARY_CONF=/tmp/opencanaryd/opencanary.conf
 exec opencanaryd --dev
