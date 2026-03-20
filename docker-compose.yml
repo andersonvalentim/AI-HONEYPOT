@@ -20,7 +20,7 @@ services:
       - "13389:13389"
       - "15432:15432"
     volumes:
-      - ./opencanary/opencanary.conf:/etc/opencanaryd/opencanary.conf
+      - ./opencanary/opencanary.conf:/etc/opencanaryd/opencanary.conf:ro
       - ./logs/opencanary:/var/log/opencanary
 
   ai-decoy:
